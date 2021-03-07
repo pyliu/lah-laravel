@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="For Aviation City use only">
+    <meta name="author" content="LIU, PANG-YU">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta http-equiv="cache-control" content="no-cache">
+    <title>桃園市地政局航空城開發科</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/starter-template.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/transition.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/aerotropolis.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="assets/css/VueBootstrapTypeahead.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="index.html"><i class="fa fa-search fa-lg"></i> 地籍整理清冊搜尋</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="admin.html""><i class=" fa fa-database fa-fw"></i> 更新資料庫</a>
+                </li>
+            </ul>
+        </div>
+        <h5 class="text-light my-auto"><i class="fas fa-plane-departure"></i> 航空城開發科</h5>
+    </nav>
+
+    <main role="main" class="container">
+        <div id="vueApp"></div>
+        <div id="footer"></div>
+    </main><!-- /.container -->
+
+    <!-- Place scripts at the end of the body to let DOM load first then scripts  -->
+    <!-- Bootstrap core JavaScript -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <!-- Vue -->
+    <script src="assets/js/vue.js"></script>
+    <script src="assets/js/vuex.js"></script>
+    <script src="assets/js/bootstrap-vue.min.js"></script>
+    <script src="assets/js/bootstrap-vue-icons.min.js"></script>
+    <!-- Add-On -->
+    <script src="assets/js/axios.min.js"></script>
+    <script src="assets/js/localforage.min.js"></script>
+    <script src="assets/js/VueBootstrapTypeahead.umd.min.js"></script>
+    <script src="assets/js/lodash.min.js"></script>
+    <script>
+        new Vue({
+            template: `<b-container fluid>
+                <vue-bootstrap-typeahead
+                    ref="typeahead"
+                    id="keyword-input"
+                    v-model="keyword"
+                    :data="preftech"
+                    placeholder="請輸入關鍵字查詢 ... "
+                    prepend="查詢條件"
+                    min-matching-chars="1"
+                    @hit="chooseTypeahead"
+                >
+                    <template #append>
+                        <b-button variant="primary" @click="search" @click="searchBy=undefined" :disabled="wip"><i class="fas fa-search"></i> 搜尋</b-button>
+                    </template>
+                </vue-bootstrap-typeahead>
+                <div class="text-muted small mb-3" style="padding-left: 90px">
+                    範例：
+                    <b-link @click="triggerInputEvent('機1-00063')">機1-00063</b-link> / 
+                    <b-link @click="triggerInputEvent('附11-010018')">附11-010018</b-link> / 
+                    <b-link @click="triggerInputEvent('A123456789')">A123456789</b-link> / 
+                    <b-link @click="triggerInputEvent('0000000158')">0000000158</b-link> / 
+                    <b-link @click="triggerInputEvent('*HE0173840')">*HE0173840</b-link> / 
+                    <b-link @click="triggerInputEvent('江川文篤')">江川文篤</b-link>
+                </div>
+                <transition name="slide-fade" mode="out-in">
+                    <div v-if="searchCount > 0">
+                        <div class="text-muted text-right">找到 {{searchCount}} 筆資料</div>
+                        <b-list-group flush compact>
+                            <b-list-group-item v-for="row in searchResults" class="d-flex justify-content-between">
+                                <b-link v-if="searchBy !== 'household'" @click.stop="quickSearch(row['household'], 'household')" title="根據歸戶號查詢">{{row['household']}}</b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">{{row['household']}}</strong>
+
+                                <b-link v-if="searchBy !== 'pid'" @click.stop="quickSearch(row['pid'], 'pid')" title="根據統編查詢">{{row['pid']}}</b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">{{row['pid']}}</strong>
+
+                                <b-link v-if="searchBy !== 'pname'" @click.stop="quickSearch(row['pname'], 'pname')" title="根據姓名查詢">{{row['pname']}}</b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">{{row['pname']}}</strong>
+
+                                <b-link v-if="searchBy !== 'owned_number'" @click.stop="quickSearch(row['owned_number'], 'owned_number')" title="根據段地號查詢">
+                                    {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
+                                    <i class="fas fa-external-link-alt text-success" @click.stop="query(row['owned_number'])" title="檢視地籍資料"></i>
+                                    <i class="fas fa-print text-primary" @click.stop="print(row['owned_number'])" title="開啟列印視窗"></i>
+                                </b-link>
+                                <strong v-else class="bg-success text-light p-1 rounded">
+                                    {{row['owned_number'].slice(0, 4)}}-{{row['owned_number'].slice(4)}}
+                                    <i class="fas fa-external-link-alt text-light" @click.stop="query(row['owned_number'])" title="檢視地籍資料" style="cursor: pointer;"></i>
+                                    <i class="fas fa-print text-light" @click.stop="print(row['owned_number'])" title="開啟列印視窗" style="cursor: pointer;"></i>
+                                </strong>
+                            </b-list-group-item>
+                        </b-list-group>
+                    </div>
+                    <h4 v-else-if="wip" class="text-center text-muted"><i class="fas fa-sync fa-spin"></i> 讀取中 ... </h4>
+                    <h4 v-else class="text-center text-muted"><i class="fas fa-exclamation-circle"></i> 查無資料。</h4>
+                </transition>
+                <b-modal
+                    ref="modal"
+                    size="lg"
+                    :title="landTitle"
+                    no-close-on-backdrop
+                    ok-title="關閉"
+                    ok-variant="secondary"
+                    ok-only
+                    scrollable
+                    hide-footer
+                    header-bg-variant="success"
+                    header-text-variant="light"
+                    body-bg-variant="light"
+                    body-text-variant="dark"
+                >
+                    <div v-html="landData"></div>
+                </b-modal>
+            </b-container>`,
+            components: {
+                VueBootstrapTypeahead
+            },
+            data: () => ({
+                keyword: '',
+                wip: false,
+                searchResults: [],
+                searchCount: 0,
+                searchBy: undefined,
+                landData: undefined,
+                landTitle: '地籍資料',
+                footer: true,
+                preftech: [
+                    '機1-00063',
+                    '附11-010018',
+                    'A123456789',
+                    '0000000158',
+                    '*HE0173840',
+                    '江川文篤'
+                ]
+            }),
+            computed: {
+                validate() {
+                    const chinese = /[\u4E00-\u9FA5]{2,}$/;
+                            // 附07-000771 機1-00001
+                    return (/^(附\d{2}\-\d{6})|(機\d{1}\-\d{5})$/.test(this.keyword) ||
+                            // 統編
+                            /^[A-Z]{1}[1-2]{1}[0-9]{8}$/.test(this.keyword) ||
+                            // 名稱
+                            chinese.test(this.keyword) ||
+                            // dead
+                            /^\*H[A-H]\d{7}$/.test(this.keyword) ||
+                            // 法人公司行號統編
+                            /^\d{8}|\d{10}$/.test(this.keyword) ||
+                            // 外國人
+                            /^\d{8}|[A-Z]{2}$/.test(this.keyword) ||
+                            // 段地號
+                            /^0\d{11}$/.test(this.keyword)) && this.keyword.length < 13 && this.keyword.length !== 9
+                },
+                input() { return this.$refs.typeahead.$el.childNodes[0].childNodes[1]; }
+            },
+            watch: {
+                // debounce the query to API to reduce the http request
+                keyword: _.debounce(function(theVal) {
+                    this.getPrefetch(theVal);
+                }, 500)
+            },
+            methods: {
+                triggerInputEvent(val) {
+                    // hack for the vue-bootstrap-typeahead component when v-model value update by others
+                    this.input.value = val;
+                    const event = new Event('input', { bubbles: true, cancelable: true });
+                    this.input.dispatchEvent(event);
+                    this.search();
+                },
+                chooseTypeahead() {
+                    this.searchBy = undefined;
+                    this.search();
+                },
+                print(number) {
+                    window.open(`print.html?number=${number}`, '_blank');
+                },
+                quickSearch(data, by) {
+                    this.keyword = data;
+                    this.searchBy = by;
+                    this.triggerInputEvent(data);
+                },
+                search() {
+                    if (!this.wip && this.keyword !== '' && this.keyword !== undefined) {
+                        this.wip = true;
+                        this.searchResults = [];
+                        this.searchCount = 0;
+                        let formData = new FormData();
+                        formData.append("keyword", this.keyword.trim());
+                        axios.post("api/search.php", formData).then((res) => {
+                            this.searchResults = res.data.results;
+                            this.searchCount = res.data.count;
+                        }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
+                    }
+                },
+                query(landNumber) {
+                    this.wip = true;
+                    let formData = new FormData();
+                    formData.append("owned_number", landNumber);
+                    axios.post("api/query_land_data.php", formData).then((res) => {
+                        this.landTitle = res.data.result[0].code + ' ' + res.data.result[0].name + ' ' + res.data.result[0].number.slice(0, 4) + '-' + res.data.result[0].number.slice(4);
+                        this.landData = res.data.result[0].content.trim().replace(/\n/g, '<br />');
+                        this.$refs.modal.show();
+                    }).catch((err) => console.error(err)).finally(() => { this.wip = false; });
+                },
+                getPrefetch(keyword) {
+                    if (_.isEmpty(keyword)) {
+                        return false;
+                    }
+                    // detect chinese char
+                    const arr = keyword.match(/[^\x00-\xff]/ig);   
+                    const len = arr === null ? keyword.length : keyword.length + arr.length;
+                    if (len > 1) {
+                        let formData = new FormData();
+                        formData.append("keyword", keyword);
+                        axios.post("api/prefetch.php", formData, { timeout: 1000 }).then((res) => {
+                            this.preftech = res.data.items;
+                        }).catch((err) => console.error(err)).finally(() => {});
+                    }
+                }
+            },
+            mounted() {
+                setTimeout(() => {
+                    this.footer = false;
+                }, 10000);
+                // hack for listen keyup event at search input
+                const that = this;
+                $(this.input).keyup(function(e){ 
+                    var code = e.key; // recommended to use e.key, it's normalized across devices and languages
+                    if(code==="Enter") { e.preventDefault(); }
+                    if(code===" " || code==="Enter" || code===","|| code===";") {
+                        that.searchBy = undefined;
+                        that.search();
+                    } // missing closing if brace
+                });
+            }
+        }).$mount('#vueApp');
+
+        const vueFooter = new Vue({
+            template: `<transition>
+                <p v-if="show" class="text-muted fixed-bottom my-2 mx-3 bg-white border rounded text-center p-2 small shadow">
+                <span>
+                    <a href="https://github.com/pyliu/aerotropolis" target="_blank" title="View project on Github!">
+                        <i class="fab fa-github fa-lg text-dark"></i>
+                    </a>
+                    <strong><i class="far fa-copyright"></i> <a href="mailto:pangyu.liu@gmail.com">LIU, PANG-YU</a> ALL RIGHTS RESERVED.</strong>
+                    <a href="https://vuejs.org/" target="_blank" title="Learn Vue JS!">
+                        <i class="text-success fab fa-vuejs fa-lg"></i>
+                    </a>
+                </span>
+                </p>
+            </transition>`,
+            data: () => ({
+                show: true
+            }),
+            mounted() {
+                setTimeout(() => this.show = false, 10000);
+            }
+        }).$mount('#footer');
+    </script>
+</body>
+
+</html>

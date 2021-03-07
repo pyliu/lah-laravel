@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Land Affairs Helper">
+<meta name="author" content="LIU, PANG-YU">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="cache-control" content="no-cache">
+<title>管理看板-桃園市中壢地政事務所</title>
+<link rel="preload" href="assets/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/loading.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/loading-btn.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/animate.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/awesome-font.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/bootstrap-vue.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="assets/css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<style>
+  fieldset {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+</style>
+</head>
+
+<body>
+  
+  <section class="hide">
+    <b-container fluid v-cloak>
+      <b-card-group deck class="mb-3">
+        <lah-user-board ref="user_search" max-height="100" class="shadow"></lah-user-board>
+        <lah-fee-query-board class="shadow"></lah-fee-query-board>
+        <lah-section-search class="shadow"></lah-section-search>
+        <!-- <b-card no-body border-variant="white"><lah-cache-mgt class="shadow"></lah-cache-mgt></b-card> -->
+      </b-card-group>
+      <b-card-group deck class="mb-3">
+        <lah-case-sync-mgt class="shadow"></lah-case-sync-mgt>
+        <lah-case-reg-search class="shadow"></lah-case-reg-search>
+        <lah-case-sur-mgt class="shadow"></lah-case-sur-mgt>
+      </b-card-group>
+      <b-card-group deck class="mb-3">
+        <lah-watchdog class="shadow"></lah-watchdog>
+        <lah-case-query-by-pid class="shadow"></lah-case-query-by-pid>
+        <lah-export-txt class="shadow"></lah-export-txt>
+      </b-card-group>
+      <b-card-group deck>
+        <lah-announcement-mgt class="shadow"></lah-announcement-mgt>
+        <lah-report class="shadow"></lah-report>
+        <lah-vuex-switch class="shadow"></lah-vuex-switch>
+      </b-card-group>
+    </b-container>
+  </section><!-- /section -->
+
+  <!-- Bootstrap core JavaScript -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/js/popper.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+
+  <script src="assets/js/vue.js"></script>
+  <script src="assets/js/vuex.js"></script>
+  <script src="assets/js/bootstrap-vue.min.js"></script>
+  <script src="assets/js/bootstrap-vue-icons.min.js"></script>
+  <script src="assets/js/axios.min.js"></script>
+  <script src="assets/js/localforage.min.js"></script>
+  <script src="assets/js/global.js"></script>
+  <script src="assets/js/components/lah-global.js"></script>
+  <!-- Vue Chart Components -->
+  <script src="assets/js/chart.min.js"></script>
+  <script src="assets/js/mark.jquery.min.js"></script>
+
+  <!-- Vue components -->
+  <script src="assets/js/components/lah-components.js"></script>
+  <script src="assets/js/components/lah-case-input-group-ui.js"></script>
+  <!-- Vue Dashboard components -->
+  <script src="assets/js/components/lah-card-components.js"></script>
+  <script src="assets/js/components/dashboards/lah-announcement-mgt.js"></script>
+  <script src="assets/js/components/dashboards/lah-case-query-by-pid.js"></script>
+  <script src="assets/js/components/dashboards/lah-case-sur-mgt.js"></script>
+  <script src="assets/js/components/dashboards/lah-case-reg-search.js"></script>
+  <script src="assets/js/components/dashboards/lah-fee-board.js"></script>
+  <script src="assets/js/components/dashboards/lah-heir-share-ratio.js"></script>
+  <script src="assets/js/components/dashboards/lah-fee-query-board.js"></script>
+  <script src="assets/js/components/dashboards/lah-case-sync-mgt.js"></script>
+  <script src="assets/js/components/dashboards/lah-export-txt.js"></script>
+  <script src="assets/js/components/dashboards/lah-lxhweb-traffic-light.js"></script>
+  <script src="assets/js/components/dashboards/lah-watchdog.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(e => { vueApp.addToStoreParams('user_id', undefined) });
+  </script>
+</body>
+</html>
