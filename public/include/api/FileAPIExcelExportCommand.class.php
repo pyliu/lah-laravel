@@ -5,7 +5,7 @@ require_once(INC_DIR.DIRECTORY_SEPARATOR."Query.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."System.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."RegCaseData.class.php");
 require_once(INC_DIR.DIRECTORY_SEPARATOR."SQLiteUser.class.php");
-require_once(ROOT_DIR.'/vendor/autoload.php');
+require_once(ROOT_DIR.'/../vendor/autoload.php');
 require_once("FileAPICommand.class.php");
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
